@@ -1,0 +1,25 @@
+﻿@page "/UserDetail"
+
+@attribute [Authorize]
+@inject IUserService _userService;
+
+<h1>UserDetail</h1>
+<hr/>
+
+<div class="border border-2 border-secondary">
+    <h2>@_userDetail.FirstName 's Tasks</h2>
+    <hr/>
+    @foreach (var todo in _userDetail.ToDos)
+    {
+        <h3>@todo.Action</h3>
+    }
+</div>
+
+@code {
+    UserDetailVM _userDetail { get; set; } = new UserDetailVM();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userDetail = await _userService.GetUserDetails();
+    }
+}

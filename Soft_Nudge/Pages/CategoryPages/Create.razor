@@ -1,0 +1,40 @@
+﻿@page "/Category/Create"
+
+@inject ICategoryService _categoryService
+@inject NavigationManager _navManager
+
+<h1 class="pageTitle">Create a Category</h1>
+<hr />
+
+@if(errorMessage != null)
+{
+    <h5>@errorMessage</h5>
+}
+else
+{
+    <div class="container">
+        <EditForm Model="@model" OnValidSubmit="@HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="form-group">
+                <label>Category Name:</label>
+                <InputText class="form-control" @bind-Value="model.Name"/>
+                <br />
+            </div>
+            <button type="submit" class="btn btn-dark">Create</button>
+        </EditForm>
+    </div>
+}
+
+@code {
+    private CategoryCreate model = new();
+    private string? errorMessage;
+    public async Task HandleSubmit()
+    {
+        var isSuccessful = await _categoryService.CreateCategory(model);
+        if (isSuccessful)
+            _navManager.NavigateTo("/Category");
+        else
+            errorMessage = "Unable to create category; try again!";
+    }
+}

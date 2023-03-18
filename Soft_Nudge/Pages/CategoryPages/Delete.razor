@@ -1,0 +1,52 @@
+﻿@page "/Category/Delete/{CategoryId:int}"
+
+@attribute [Authorize]
+@inject ICategoryService _categoryService
+@inject NavigationManager _navManager
+
+<h1 class="pageTitle">Delete Category</h1>
+
+@if (errorMessage != null)
+{
+    <p>@errorMessage</p>
+}
+else
+{
+    <h4><b>Are you sure you want to delete your @categoryDetail.Name category?</b></h4>
+        <h5><b>Your nudges and reflections in this category will be deleted, too!</b></h5>
+        <hr />
+        <br />
+        <a href="/Category" class="btn btn-dark">I changed my mind!</a>
+        <br/>
+        <br />
+        <hr />
+        <br />
+        <EditForm Model="@categoryDetail" OnValidSubmit="@DeleteNote">
+            <button type="submit" class="btn btn-danger">Delete Category</button>
+        </EditForm>
+}
+
+
+@code {
+    [Parameter]
+    public int CategoryId { get; set; }
+    private CategoryDetail? categoryDetail { get; set; }
+    private string? errorMessage { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        categoryDetail = await _categoryService.GetCategory(CategoryId);
+    }
+    public async Task DeleteNote()
+    {
+        var isSuccessful = await _categoryService.DeleteCategory(CategoryId);
+        if(isSuccessful)
+        {
+            _navManager.NavigateTo("/Category");
+        }
+        else
+        {
+            errorMessage = "Category was not deleted.";
+        }
+    }
+
+}

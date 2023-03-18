@@ -1,0 +1,83 @@
+﻿@page "/Notes/Create"
+
+@attribute [Authorize]
+@inject INoteService _noteService
+@inject IToDoService _todoService
+@inject NavigationManager _navManager
+
+
+<h1 class="pageTitle">Create Reflection</h1>
+<hr/>
+<p class="think">Things to think about:</p>
+<ul class="think">
+    <li>Were you able to finish the task?</li>
+    <li>How long did it take you?</li>
+    <li>Any feelings (physical and/or emotional) come up in anticipation of the task? During? After?</li>
+    <li>Any differences from the last time you did this particular task?</li>
+</ul>
+<hr />
+
+@if (errorMessage != null)
+{
+    <h5>@errorMessage</h5>
+}
+else
+{
+    <EditForm Model="@model" OnValidSubmit="@HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label>Select Nudge to Reflect Upon:</label>
+            <InputSelect @bind-Value="model.ToDoId" class="form-select">
+                <option value="0" disabled="disabled" selected>Nudge</option>
+                @foreach (var t in ToDos)
+                {
+                    <option value="@t.Id">@t.Action</option>
+                }
+            </InputSelect>
+        </div>
+        <br/>
+        <div class="form-group">
+            <label>Reflection:</label>
+            <InputText class="form-control" @bind-Value="model.Entry" />
+        </div>
+        <br/>
+        <div class="form-group">
+            <label>On a scale of XXS to XXL, how big or small of a feat was this (this time)?</label>
+            <InputSelect @bind-Value="model.DifficultyLevel">
+                <option value="0" disabled="disabled" selected>Effort</option>
+                <option value="XXS">XXS (task took minimal effort)</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL (task took a ridiculous amount of effort)</option>
+            </InputSelect>
+        </div>
+        <br/>        
+        <button type="submit" class="btn btn-dark">Finish</button>
+    </EditForm>
+}
+
+
+
+@code {
+    private NoteCreate model = new();
+    private List<ToDoDetail> ToDos = new(); 
+    private string? errorMessage;
+
+    protected async override Task OnInitializedAsync()
+    {
+        ToDos = await _todoService.GetToDosList();
+    }
+
+    public async Task HandleSubmit()
+    {
+        var isSuccessful = await _noteService.CreateNote(model);
+        if (isSuccessful)
+        { _navManager.NavigateTo("/Notes"); }
+        else
+        { errorMessage = "Note was not created. Please try again!"; }
+    }
+}

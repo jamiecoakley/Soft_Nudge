@@ -1,0 +1,55 @@
+﻿@page "/ToDos/Create"
+
+@attribute [Authorize]
+@inject ICategoryService _categoryService
+@inject IToDoService _todoService
+@inject NavigationManager _navManager
+
+<h1 class="pageTitle">Create a New Nudge</h1>
+<hr/>
+
+@if(errorMessage != null)
+{
+    <h5>@errorMessage</h5>
+}
+else
+{
+<EditForm Model="@model" OnValidSubmit = "@HandleSubmit">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div class="form-group">
+        <label>Nudge:</label>
+        <InputText class="form-control" @bind-Value="model.Action"/>
+    </div>
+    <br/>
+        <InputSelect @bind-Value="model.CategoryId" class="form-select">
+            <option value ="0" disabled ="disabled" selected>Select Category</option>
+            @foreach (var c in Categories)
+            {
+                <option value="@c.Id">@c.Name</option>
+            }
+        </InputSelect>   
+    <br/>
+    <button type="submit" class="btn btn-dark">Create Nudge</button>
+</EditForm>
+}
+
+
+@code {
+    private ToDoCreate model = new();
+    private List<CategoryListItem> Categories = new();
+    private string? errorMessage;
+    protected async override Task OnInitializedAsync()
+    {
+        Categories = await _categoryService.GetCategoryList();
+    }
+
+    public async Task HandleSubmit()
+    {
+        var isSuccessful = await _todoService.CreateToDo(model);
+        if (isSuccessful)
+        { _navManager.NavigateTo("/ToDos"); }
+        else
+        { errorMessage = "Nudge was not created. Please try again!"; }
+    }
+}

@@ -1,0 +1,65 @@
+﻿@page "/Notes/Delete/{NoteId:int}"
+
+@attribute [Authorize]
+@inject INoteService _noteService
+@inject NavigationManager _navManager
+
+<h1 class="pageTitle">Delete Reflection</h1>
+<br/>
+<h4><b>Are you sure you want to delete this reflection?</b></h4>
+<h5><b>Don't forget that these reflections are a way to track progress!</b></h5>
+<hr/>
+<br/>
+<a href="/Notes" class="btn btn-dark">I changed my mind!</a>
+<br/>
+<br/>
+<hr/>
+
+@if (errorMessage != null)
+{
+    <p>@errorMessage</p>
+}
+
+else
+{
+    if (noteDetail is null)
+    {
+        <p>There is no task to delete!</p>
+        <a href="/" class="btn btn-primary">Back to Home Page</a>
+    }
+    else
+    {
+        <div id="youSaid">
+            <p>On @noteDetail.NoteCreatedDate, you took the initiative to @noteDetail.ToDo.Action.</p>
+            <p>It took @noteDetail.DifficultyLevel effort that day, and you said:</p>
+            <p> "@noteDetail.Entry"</p>
+        </div>
+        <br/>
+        <EditForm Model="@noteDetail" OnValidSubmit="@DeleteNote">
+            <button type="submit" class="btn btn-danger">Delete Reflection</button>
+        </EditForm>
+    }
+}
+
+@code {
+    [Parameter]
+    public int NoteId { get; set; }
+    public NoteDetail? noteDetail { get; set; }
+    private string? errorMessage { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        noteDetail = await _noteService.GetNote(NoteId);
+    }
+    public async Task DeleteNote()
+    {
+        var isSuccessful = await _noteService.DeleteNote(NoteId);
+        if (isSuccessful)
+        {
+            _navManager.NavigateTo("/Notes");
+        }
+        else
+        {
+            errorMessage = "Task was not deleted.";
+        }
+    }
+}

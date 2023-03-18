@@ -1,0 +1,84 @@
+﻿@page "/"
+
+@attribute [Authorize]
+
+@inject ICategoryService _categoryService
+@inject IToDoService _todoService
+
+<PageTitle>Soft Nudge</PageTitle>
+
+<div class="titleDiv"> @*Title that will appear regardless of where user is at in the "steps"*@
+    <h1 id="title">This is your <b>Soft Nudge</b>. You've got this.</h1>
+</div>
+
+
+
+@if (Category.Count() == 0) //"Step 1" - no categories have been created yet, and the user can't start creating their tasks until they do.
+                            //Will revert to this if the user deletes all of their categories.
+{
+    <div class="steps">
+        <h2>Looks like you're new here! Let's start you off by making your first category.</h2>
+        <br/>
+        <a href="/Category/Create" class="btn btn-dark">Create Your First Category</a>
+        <br />
+                <p>If you need some ideas, Soft Nudge suggests:</p>
+            <ul>
+                <li>Self-Care</li>
+                <li>Small Chores</li>
+                <li>Cleaning</li>
+                <li>Hobbies or Projects</li>
+            </ul>
+    </div>
+}
+else //"Step 2" - the user can start creating nudges once they've created at least one category.
+    //Will revert to this if the user deletes all of their notes, but keeps at least one category.
+{    
+    @if (ToDos.Count() == 0)
+    {
+        <div class="steps">
+            <h2>You haven't created your first nudge yet!</h2>
+            <br />
+            <a href="/ToDos/Create" class="btn btn-dark">Create Your First Nudge</a>
+            <br/>
+            <p>Soft Nudge suggests tasks like the following to get started:</p>
+            <ul>
+                <li>Wash your face</li>
+                <li>Make your bed</li>
+                <li>Write down two things you're grateful for</li>
+                <li>Take out the garbage</li>
+            </ul>            
+        </div>
+    }
+    else //"Step 3" - user will see the full functionality of the app once they've made at least one category and at least one task; although it will be a lot better once they've created multiple tasks.'
+    {
+        <div class="randomDiv">
+            <h2>Welcome back! So glad you made it!</h2>        
+            <button onclick="@GetRandomToDo" id="randomButton">Nudge Me!</button>
+            <p id="actionItem">@toDoListItem.Action</p>
+            <br/>
+            <div class="steps">
+                <p>Come back when you're done to reflect on your experience.</p>
+                <a href="/Notes/Create" class="btn btn-dark">Reflect</a>
+            </div>
+
+        </div>
+    }
+}
+
+@*<SurveyPrompt Title="How is Blazor working for you?" />
+*@
+@code {
+    private List<CategoryDetail> Category = new List<CategoryDetail>();
+    private List<ToDoDetail> ToDos = new List<ToDoDetail>();
+    private ToDoListItem toDoListItem = new ToDoListItem();
+    protected override async Task OnInitializedAsync()
+    {
+        Category = await _categoryService.GetCategories();
+        ToDos = await _todoService.GetToDosList();
+    }
+    private async Task GetRandomToDo()
+    {
+        toDoListItem = await _todoService.GetRandomToDo();
+
+    }
+}

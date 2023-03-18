@@ -1,0 +1,64 @@
+﻿@page "/Category"
+
+@attribute [Authorize]
+@inject ICategoryService _categoryService
+@inject IToDoService _todoService
+
+<h1 class ="pageTitle">Categories</h1>
+<hr />
+
+@if (Categories.Count() > 0) //"Step 1A" - user can see the categories they've created once there's something to see.
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in Categories)
+            {
+                <tr>
+                    <td>@c.Name</td>
+                    <td>  
+                        @*"Step 1B" - user has access to Edit and Delete their categories once they have at least one made.*@
+                        <a href="/Category/Edit/@c.Id" class="btn btn-warning">Edit</a>
+                        <a href="/Category/Delete/@c.Id" class="btn btn-danger">Delete</a>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+    <br />
+    <a href="/Category/Create" class="btn btn-dark">Create New Category</a>
+}
+else //"Step 1" - no categories have been created yet, and the user can't start creating their tasks until they do.'
+     //Will revert to this if the user deletes all of their categories.
+{
+    <div class="steps">
+        <h3>Looks like you're new here! Let's start you off by making your first category.</h3>
+        <br />
+        <a href="/Category/Create" class="btn btn-dark">Create Your First Category</a>
+        <hr/>
+        <p>If you need some ideas, Soft Nudge suggests:</p>
+        <ul>
+            <li>Self-Care</li>
+            <li>Small Chores</li>
+            <li>Cleaning</li>
+            <li>Hobbies or Projects</li>
+        </ul>
+        <hr />
+    </div>
+}
+
+@code {
+    public List<CategoryDetail> Categories = new();
+    public List<ToDoListItem> ToDos = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Categories = await _categoryService.GetCategories();
+    }
+
+}

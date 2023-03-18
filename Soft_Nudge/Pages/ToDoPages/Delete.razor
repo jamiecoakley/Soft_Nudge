@@ -1,0 +1,61 @@
+﻿@page "/ToDos/Delete/{ToDoId:int}"
+
+@attribute [Authorize]
+@inject IToDoService _todoService
+@inject NavigationManager _navManager
+
+<h1 class="pageTitle">Delete Nudge</h1>
+
+@if (errorMessage != null)
+{
+    <p>@errorMessage</p>
+}
+
+else
+{
+    if (todoDetail is null)
+    {
+        <p>There is no task to delete!</p>
+        <a href="/" class="btn btn-dark">Back to Home Page</a>
+    }
+    else
+    {
+        <h4><b>Are you sure you want to delete your "@todoDetail.Action" nudge?</b></h4>
+        <h5><b>All of your reflections about this nudge will be deleted, too!</b></h5>
+        <hr />
+        <br/>
+        <a href="/ToDos" class="btn btn-dark">I changed my mind!</a>
+        <br/>
+        <br/>
+        <hr/>
+        <br/>
+        <EditForm Model="@todoDetail" OnValidSubmit="@DeleteToDo">
+            <button type="submit" class="btn btn-danger">Delete Task</button>
+        </EditForm>
+    }
+}
+
+
+
+@code {
+    [Parameter]
+    public int ToDoId { get; set; }
+    public ToDoDetail? todoDetail { get; set; }
+    private string? errorMessage { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        todoDetail = await _todoService.GetToDo(ToDoId);
+    }
+    public async Task DeleteToDo()
+    {
+        var isSuccessful = await _todoService.DeleteToDo(ToDoId);
+        if (isSuccessful)
+        {
+            _navManager.NavigateTo("/ToDos");
+        }
+        else
+        {
+            errorMessage = "Task was not deleted.";
+        }
+    }
+}

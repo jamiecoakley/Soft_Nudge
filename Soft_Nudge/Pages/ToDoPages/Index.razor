@@ -1,0 +1,91 @@
+﻿@page "/ToDos"
+
+@attribute [Authorize]
+@inject IToDoService _todoService
+@inject INoteService _noteService
+@inject ICategoryService _categoryService
+
+<h1 class="pageTitle">Nudges</h1>
+<hr/>
+
+@if (Category.Count() < 1) //Step 1: this is what the user will see if they haven't yet created a category; can't create a task without having a category to assign it to.
+                            //Will revert to this if the user deletes all of their categories.
+{
+    <div class="steps">        
+        <h3>Looks like you're new here! Let's start you off by making your first category.</h3>
+        <br />
+        <a href="/Category/Create" class="btn btn-dark">Create Your First Category</a>
+        <hr />
+        <p>If you need some ideas, Soft Nudge suggests:</p>
+        <ul>
+            <li>Self-Care</li>
+            <li>Small Chores</li>
+            <li>Cleaning</li>
+            <li>Hobbies or Projects</li>
+        </ul>
+        <hr />
+    </div>
+}
+else
+{
+
+    @if (ToDos.Count() > 0) //Step 3: User will be able to see this once they've created at least one task.
+    {
+        <br/>
+            <table class="table table-striped"> @*Step 3A: User will be able to see their tasks once they've created at least one.*@
+                <thead>
+                    <tr>
+                        <th>Nudge</th>
+                        <th>Category</th>
+                        @*<th>Number of Entries</th>*@
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var t in ToDos)
+                {
+                            <tr>
+                                <td>@t.Action</td>
+                                <td>@t.Category.Name</td>
+                                @*<td>@t.Notes.Count() </td>*@
+                                <td>
+                                    @*Step 4: User will be able to create notes once they've created at least one task.*@
+                                    <a href="/Notes/Create" class="btn btn-secondary">Reflect</a>
+                                   @* Step 3B: User will be able to edit and delete their task(s) once they've created them.*@
+                                    <a href="/ToDos/Edit/@t.Id" class="btn btn-warning">Edit</a>
+                                    <a href="/ToDos/Delete/@t.Id" class="btn btn-danger">Delete</a>                                    
+                                </td>
+                            </tr>
+                }
+                </tbody>
+            </table>
+            <a href="/ToDos/Create" class="btn btn-dark">Create Nudge</a>
+    }
+    else //Step 2: User will see this once they've created a category, but haven't yet created a task.
+        //Will revert to this if the user deletes all of their tasks, but keeps at least one category.
+    {
+        <div class="steps">
+            <h3>Now that you've created your first category, let's move on to creating your first nudge!</h3>
+            <br />
+            <a href="/ToDos/Create" class="btn btn-dark">Create Your First Nudge</a>
+            <hr/>
+            <p>Soft Nudge suggests tasks like the following to get started:</p>
+            <ul>
+                <li>Wash your face</li>
+                <li>Make your bed</li>
+                <li>Write down two things you're grateful for</li>
+                <li>Take out the garbage</li>
+            </ul>
+        </div>
+    }
+}
+
+@code {
+    private List<ToDoDetail> ToDos = new List<ToDoDetail>();
+    private List<CategoryDetail> Category = new List<CategoryDetail>();
+    protected override async Task OnInitializedAsync()
+    {
+        ToDos = await _todoService.GetToDosList();
+        Category = await _categoryService.GetCategories();
+    }
+}

@@ -1,0 +1,58 @@
+﻿@page "/Category/Edit/{CategoryId:int}"
+
+@attribute [Authorize]
+@inject ICategoryService _categoryService
+@inject NavigationManager _navManager
+
+<h1 class="pageTitle">Edit Category</h1>
+<hr/>
+
+@if (errorMessage != null)
+{
+    <h5>@errorMessage</h5>
+}
+else
+{
+    <div class="container">
+        <EditForm Model="@model" OnValidSubmit="@HandleSubmit">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <div class="form-group">
+                <label>Updated Category Name:</label>
+                <InputText class="form-control" @bind-Value="model.Name"/>
+            </div>
+            <br />
+            <button type="submit" class="btn btn-dark">Update Category</button>
+        </EditForm>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int CategoryId { get; set; }
+    private CategoryEdit model = new();
+    private CategoryDetail _categoryDetail = new();
+    private string? errorMessage;
+    protected override async Task OnInitializedAsync()
+    {
+        _categoryDetail = await _categoryService.GetCategory(CategoryId);
+        if(_categoryDetail != null)
+        {
+            model.Name = _categoryDetail.Name;
+        }
+    }
+    public async Task HandleSubmit()
+    {
+        model.Id = CategoryId;
+        var isSuccessful = await _categoryService.UpdateCategory(model);
+        if (isSuccessful)
+        {
+            _navManager.NavigateTo("/Category");
+        }
+        else
+        {
+            errorMessage = "Your category could not be updated; please try again!";
+        }
+    }
+}
+

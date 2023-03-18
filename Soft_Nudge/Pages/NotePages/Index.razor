@@ -1,0 +1,109 @@
+﻿@page "/Notes"
+
+@attribute [Authorize]
+@inject IToDoService _todoService
+@inject INoteService _noteService
+@inject ICategoryService _categoryService
+
+<h1 class="pageTitle">Reflections</h1>
+<hr/>
+
+@if (Category.Count() < 1) //"Step 1" - no categories have been created yet, and the user can't start creating their tasks until they do.'
+                            //Will revert to this if the user deletes all of their categories.
+{
+    <div class="steps">
+        <h3>Looks like you're new here! Let's start you off by making your first category.</h3>
+        <br />
+        <a href="/Category/Create" class="btn btn-dark">Create Your First Category</a>
+        <hr />
+        <p>If you need some ideas, Soft Nudge suggests:</p>
+        <ul>
+            <li>Self-Care</li>
+            <li>Small Chores</li>
+            <li>Cleaning</li>
+            <li>Hobbies or Projects</li>
+        </ul>
+        <hr />
+    </div>
+}
+else
+{
+    @if (ToDos.Count() == 0)//Step 2: User will see this once they've created a category, but haven't yet created a task.
+                           //Will revert to this if the user deletes all of their tasks, but keeps at least one category.
+    {
+        <div class="steps">
+            <h3>Now that you've created your first category, let's move on to creating your first nudge!</h3>
+            <br />
+            <a href="/ToDos/Create" class="btn btn-dark">Create Your First Nudge</a>
+            <hr />
+            <p>Soft Nudge suggests tasks like the following to get started:</p>
+            <ul>
+                <li>Wash your face</li>
+                <li>Make your bed</li>
+                <li>Write down two things you're grateful for</li>
+                <li>Take out the garbage</li>
+            </ul>
+        </div>
+    }
+    else 
+    {
+        @if (Notes.Count() == 0) //Step 4: User will be able to see this once they've created at least one task.
+                                //Will revert to this if user deletes all of thier notes, but keeps at least one category and task.
+        {
+            <div class="steps">
+                <h2>This is where you'll come to reflect after you've been nudged and taken the initiative to act on it.</h2>
+                <br/>
+                <h3>Consider your five senses. Sit with what you're feeling. It may feel weird or uncomfortable at first, but growth happens outside of your comfort zone.</h3>
+                <a href="/Notes/Create" class="btn btn-dark">Write Your First Reflection</a>
+            </div>
+        }
+        else //Step 4A: User will be able to see this once they've created at least one note.
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nudge</th>
+                        <th>Reflection</th>
+                        <th>Effort</th>
+                        <th>Date Created</th>
+                        <th>Date Modified</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var n in Notes)
+                    {        
+                        <tr>
+                            <th>@n.ToDo.Action</th>
+                            <th>@n.Entry</th>
+                            <th>@n.DifficultyLevel</th>
+                            <th>@n.NoteCreatedDate</th>
+                            <th>@n.NoteModifiedDate</th>
+                            <th>
+                                @*Step 4B: User will be able to edit and delete a note once it's been created.*@
+                                <a href="/Notes/Edit/@n.Id" class="btn btn-warning">Edit</a>
+                                <a href="/Notes/Delete/@n.Id" class="btn btn-danger">Delete</a>
+                            </th>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <a href="/Notes/Create" class="btn btn-dark">Add a Reflection</a>
+            }
+        }
+}
+
+
+@code {
+    private List<NoteDetail> Notes = new();
+    private List<ToDoDetail> ToDos = new();
+    private List<CategoryDetail> Category = new();
+    protected override async Task OnInitializedAsync()
+    {
+        Notes = await _noteService.GetNotes();
+        ToDos = await _todoService.GetToDosList();
+        Category = await _categoryService.GetCategories();
+
+    }
+}

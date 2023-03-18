@@ -1,0 +1,88 @@
+﻿body {
+    background-color: cornflowerblue;
+    font-family: 'Ink Free';
+    font-weight: bold;
+    color: #212529;
+    font-size: x-large;
+}
+
+.btn{
+    font-size: x-large;
+}
+
+.titleDiv {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 2vh;
+}
+
+.pageTitle{
+    /*font-size: xxx-large;*/
+    font-weight:600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.steps{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.randomDiv{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+#randomButton {
+    color: #F7F7F7;
+    background-image: linear-gradient(#3A0647, #092565);
+    height: 5em;
+    width: 5em;
+    border-radius: 50%;
+    margin-top: 2vw;
+    margin-bottom: 4vw;
+    font-size: 48px;
+}
+
+    #randomButton:hover {
+        box-shadow: 4px 4px #F7F7F7;
+        height: 5.1em;
+        width: 5.1em;
+    }
+
+InputText, .form-control, .form-select{
+   font-size: x-large;
+}
+
+#actionItem {
+    background-color: #F7F7F7;
+    padding-left: 17vw;
+    padding-right: 17vw;
+    padding-top: 10vh;
+    padding-bottom: 10vh;
+    border: 10px solid #3A0647;
+    border-radius: 20px;
+    font-size: 80px;
+    text-align: center;
+    color: #212529;
+}
+
+.think{
+    font-size: x-large;
+    font-weight: normal;
+}
+
+#youSaid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #3A0647;
+    border-radius: 20px;
+}

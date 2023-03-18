@@ -1,0 +1,79 @@
+﻿@page "/ToDos/Edit/{ToDoId:int}"
+
+@attribute [Authorize]
+@inject ICategoryService _categoryService
+@inject IToDoService _todoService
+@inject NavigationManager _navManager
+
+<h1 class="pageTitle">Edit Nudge</h1>
+<hr/>
+
+@if(errorMessage != null)
+{
+<h5>@errorMessage</h5>
+}
+else
+{
+<EditForm Model="@model" OnValidSubmit="@HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label>Nudge:</label>
+        <InputText class="form-control" @bind-Value="model.Action" />
+    </div>
+    <br/>
+    @if (Categories == null)
+    {
+        <p>No available categories! Please create a category to finish creating your task.</p>
+        <a href="/Category/Create" class="btn btn-dark">Create a Category</a>
+    }
+    else
+    {
+        <div class="form-group">
+            <label>Category:</label>
+            <InputSelect @bind-Value="model.CategoryId">
+                <option value="0" disabled="disabled" selected>Select Category</option>
+                @foreach (var c in Categories)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </InputSelect>
+        </div>
+    }
+    <br/>
+    <button type="submit" class="btn btn-dark">Update Nudge</button>
+</EditForm>
+}
+
+@code {
+    [Parameter]
+    public int ToDoId { get; set; }
+    private ToDoEdit model = new();
+    private ToDoDetail _todoDetail = new();
+    private List<CategoryListItem>? Categories;
+    private string? errorMessage;
+    protected override async Task OnInitializedAsync()
+    {
+        _todoDetail = await _todoService.GetToDo(ToDoId);
+
+        if(_todoDetail != null)
+        {
+            model.Id = _todoDetail.Id;
+            model.Action = _todoDetail.Action;
+            model.CategoryId = _todoDetail.Category.Id;
+        }
+        Categories = await _categoryService.GetCategoryList();
+    }
+    public async Task HandleSubmit()
+    {
+        var isSuccessful = await _todoService.UpdateToDo(model);
+        if (isSuccessful)
+        {
+            _navManager.NavigateTo("/ToDos");
+        }
+        else
+        {
+            errorMessage = "Your task was not updated; try again!";
+        }
+    }
+}

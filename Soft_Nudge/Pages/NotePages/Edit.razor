@@ -1,0 +1,74 @@
+﻿@page "/Notes/Edit/{NoteId:int}"
+
+@attribute [Authorize]
+@inject INoteService _noteService
+@inject IToDoService _todoService
+@inject NavigationManager _navManager
+
+<h1 class="pageTitle">Edit Reflection</h1>
+<hr/>
+
+@if (errorMessage != null)
+{
+    <h5>@errorMessage</h5>
+}
+else
+{
+    <EditForm Model="@model" OnValidSubmit="@HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label>Updated Reflection:</label>
+            <InputText class="form-control" @bind-Value="model.Entry" />
+        </div>
+        <br/>
+        <div class="form-group">
+            <label>Updated Effort Level</label>
+            <InputSelect @bind-Value="model.DifficultyLevel">
+                <option value="XXS">XXS (task took minimal effort)</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL (task took a ridiculous amount of effort)</option>
+            </InputSelect>
+        </div>
+        <br/>
+        <button type="submit" class="btn btn-dark">Update Reflection</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int NoteId { get; set; }
+    private NoteEdit model = new();
+    private NoteDetail _noteDetail = new();
+    private List<ToDoDetail> ToDos = new();
+    private string? errorMessage;
+    protected override async Task OnInitializedAsync()
+    {
+        ToDos = await _todoService.GetToDosList();
+        _noteDetail = await _noteService.GetNote(NoteId);
+
+        if (_noteDetail != null)
+        {
+            model.Id = _noteDetail.Id;
+            model.Entry = _noteDetail.Entry;
+            model.DifficultyLevel = _noteDetail.DifficultyLevel;
+            model.NoteModifiedDate = DateTimeOffset.Now;
+        }
+    }
+    public async Task HandleSubmit()
+    {
+        var isSuccessful = await _noteService.UpdateNote(model);
+        if (isSuccessful)
+        {
+            _navManager.NavigateTo("/Notes");
+        }
+        else
+        {
+            errorMessage = "Your note was not updated; try again!";
+        }
+    }
+}
